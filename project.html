@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyMart — Demo</title>
+  
+  <link rel="stylesheet" href="slider.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Small extra utility styles */
+    .sheet-enter { transform: translateX(100%); }
+    .sheet-enter-active { transform: translateX(0); transition: transform .32s cubic-bezier(.2,.8,.2,1); }
+    .sheet-exit { transform: translateX(0); }
+    .sheet-exit-active { transform: translateX(100%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+    }
+
+    /* Popup background overlay */
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    /* Popup box container */
+    .popup-box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      width: 300px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .popup-box h2 {
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .popup-buttons button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+
+    .popup-buttons button:hover {
+      opacity: 0.9;
+    }
+
+    .gmail-btn { background: #ff0000; color: white; }
+    .insta-btn { background: #e1306c; color: white; }
+    .close-btn { background: #000000; color: white; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-4">
+        <span class="font-bold text-xl tracking-tight">MyMart</span>
+        <img src="https://cdn.vectorstock.com/i/1000v/41/71/m-mart-grocery-store-and-brands-logo-vector-41924171.jpg" alt="MyMart Logo" class="w-24 h-auto rounded" />
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div id="locationWrap" class="hidden md:flex items-center gap-2 text-sm text-gray-700">
+          <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 21s8-4.5 8-10a8 8 0 10-16 0c0 5.5 8 10 8 10z" stroke-width="1.5"/>
+          </svg>
+          <select id="locationSelect" class="rounded-xl border bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="">Select your city</option>
+            <option>Mumbai, Maharashtra</option>
+            <option>Delhi</option>
+            <option>Bengaluru, Karnataka</option>
+            <option>Hyderabad, Telangana</option>
+            <option>Chennai, Tamil Nadu</option>
+            <option>Kolkata, West Bengal</option>
+            <option>Ahmedabad, Gujarat</option>
+            <option>Vadodara, Gujarat</option>
+            <option>Pune, Maharashtra</option>
+            <option>Jaipur, Rajasthan</option> 
+            <option>Lucknow, Uttar Pradesh</option>
+            <option>Indore, Madhya Pradesh</option>
+            <option>Patna, Bihar</option>
+            <option>Surat, Gujarat</option>
+            <option>Bhopal, Madhya Pradesh</option>
+            <option>Sirohi, Rajasthan</option>
+            <option>Khandwa, Madhya Pradesh</option>
+            <option>Nagpur, Maharashtra</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    
+    <div class="flex items-center gap-3 mb-6">
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z" stroke-width="2"/>
+        </svg>
+        <input id="search" type="text" placeholder="Search for milk, bread, fruits…" class="w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500"/>
+      </div>
+
+      <div class="hidden md:block shrink-0">
+        <div class="inline-flex items-center gap-2 rounded-xl bg-green-600/10 text-green-700 px-3 py-2 text-xs font-semibold">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 6v6l4 2" stroke-width="2"/>
+          </svg>
+          10–15 min avg ETA
+        </div>
+      </div>
+    </div>
+
+    <div class="slider-container relative overflow-hidden rounded-2xl bg-gray-200 h-48 sm:h-64 mb-4">
+      <div class="slides flex h-full transition-transform duration-500 ease-out">
+        <img src="https://rukminim2.flixcart.com/fk-p-flap/1600/270/image/a280178fe06c1360.jpg?q=20" class="w-full h-full object-cover shrink-0" alt="Promo 1">
+        <img src="https://rukminim2.flixcart.com/fk-p-flap/1600/270/image/4c30f85a020c41c3.jpg?q=20" class="w-full h-full object-cover shrink-0" alt="Promo 2">
+        <img src="https://rukminim2.flixcart.com/fk-p-flap/1600/270/image/91707f6792a9c1d1.png?q=20" class="w-full h-full object-cover shrink-0" alt="Promo 3">
+        <img src="https://rukminim2.flixcart.com/fk-p-flap/1600/270/image/6ae7462eb0b7852b.jpg?q=20" class="w-full h-full object-cover shrink-0" alt="Promo 4">
+        <img src="https://rukminim2.flixcart.com/fk-p-flap/1600/270/image/a104bf2d4cf7dc95.jpg?q=20" class="w-full h-full object-cover shrink-0" alt="Promo 5">
+        <img src="https://rukminim2.flixcart.com/fk-p-flap/1600/270/image/fc2bfaad2bb50940.jpg?q=20" class="w-full h-full object-cover shrink-0" alt="Promo 6">
+      </div>
+
+      <button class="prev absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full p-2 hover:bg-black/60 z-10">&#10094;</button>
+      <button class="next absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full p-2 hover:bg-black/60 z-10">&#10095;</button>
+    </div>
+
+    <div class="dots flex justify-center gap-1.5 mb-6">
+      <span class="dot w-2 h-2 rounded-full bg-gray-300 cursor-pointer active"></span>
+      <span class="dot w-2 h-2 rounded-full bg-gray-300 cursor-pointer"></span>
+      <span class="dot w-2 h-2 rounded-full bg-gray-300 cursor-pointer"></span>
+      <span class="dot w-2 h-2 rounded-full bg-gray-300 cursor-pointer"></span>
+      <span class="dot w-2 h-2 rounded-full bg-gray-300 cursor-pointer"></span>
+      <span class="dot w-2 h-2 rounded-full bg-gray-300 cursor-pointer"></span>
+    </div>
+
+    <div id="categoryPills" class="flex gap-2 overflow-x-auto pb-3 scrollbar-none"></div>
+
+    <section id="productGrid" class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></section>
+
+    <div class="my-16"></div>
+  </main>
+
+  <button id="fabCart" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 items-center gap-2 rounded-full bg-green-600 px-6 py-3 text-white shadow-xl z-30 hover:bg-green-700 transition">
+    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4" stroke-width="2"/>
+    </svg>
+    <span>View Cart (<span id="fabCount">0</span>)</span>
+  </button>
+
+  <div id="cartOverlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
+  <aside id="cartSheet" class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50"> 
+    <div class="flex h-full flex-col">
+      <div class="flex items-center justify-between border-b p-4">
+        <div class="font-bold text-lg">Your Cart</div>
+        <button id="closeCart" class="rounded-xl border p-1.5 hover:bg-gray-100">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+
+      <div class="border-t p-4 bg-gray-50">
+        <div class="flex items-center justify-between text-sm mb-3">
+          <span class="text-gray-600">Subtotal</span>
+          <span id="subtotal" class="font-bold text-lg text-green-600">₹0</span>
+        </div>
+        <button id="checkoutBtn" class="w-full rounded-2xl bg-green-600 hover:bg-green-700 text-white px-4 py-3 font-semibold transition disabled:opacity-50">
+          Checkout Items
+        </button>
+        <p class="mt-2 text-[11px] text-gray-400 text-center">No real payments processed on this demo platform.</p>
+      </div>
+    </div>
+  </aside>
+
+  <footer class="border-t bg-white mt-12 border-gray-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-sm text-gray-600">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div>
+          <div class="font-bold text-gray-800 mb-2">Quick links</div>
+          <ul class="space-y-1.5">
+            <li class="hover:underline cursor-pointer">About Us</li>
+            <li class="hover:underline cursor-pointer">Careers</li>
+            <li class="hover:underline cursor-pointer">Help Desk</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold text-gray-800 mb-2">Cities Served</div>
+          <ul class="space-y-1.5">
+            <li>Khandwa</li>
+            <li>Delhi NCR</li>
+            <li>Khar Kalan</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold text-gray-800 mb-2">Legal</div>
+          <ul class="space-y-1.5">
+            <li class="hover:underline cursor-pointer">Privacy Policy</li>
+            <li class="hover:underline cursor-pointer">Terms of Service</li>
+            <li class="hover:underline cursor-pointer">Refund Rules</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold text-gray-800 mb-2">Contact</div>
+          <ul class="space-y-1.5">
+            <li><a href="#" class="text-green-600 hover:underline" onclick="showPopup(); return false;">chirayuvaidya955@gmail.com</a></li>
+            <li><a href="tel:+919111973558" class="hover:underline">+91-9111973558</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-gray-100 text-xs text-center text-gray-400">
+        &copy; <span id="year"></span> MyMart. Built with plain HTML, Tailwind & JS.
+      </div>
+    </div>
+  </footer>
+
+  <div class="popup-overlay" id="popup">
+    <div class="popup-box">
+      <h2>Open Link With:</h2>
+      <div class="popup-buttons">
+        <button class="gmail-btn" onclick="openGmail()">📧 Gmail</button>
+        <button class="insta-btn" onclick="openInstagram()">📷 Instagram</button>
+        <button class="close-btn" onclick="closePopup()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      
+      // Set footer year automatically
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+      /* ================= IMAGES CAROUSEL SLIDER ================= */
+      const slides = document.querySelector('.slides');
+      const images = document.querySelectorAll('.slides img');
+      const prevBtn = document.querySelector('.prev');
+      const nextBtn = document.querySelector('.next');
+      const dots = document.querySelectorAll('.dot');
+
+      if (slides && images.length) {
+        let currentIndex = 0;
+
+        function showSlide(i) {
+          currentIndex = i;
+          if (currentIndex >= images.length) currentIndex = 0;
+          if (currentIndex < 0) currentIndex = images.length - 1;
+
+          slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+          dots.forEach(d => d.classList.remove('bg-green-600', 'w-4'));
+          dots.forEach(d => d.classList.add('bg-gray-300', 'w-2'));
+          
+          if (dots[currentIndex]) {
+            dots[currentIndex].classList.remove('bg-gray-300', 'w-2');
+            dots[currentIndex].classList.add('bg-green-600', 'w-4');
+          }
+        }
+
+        nextBtn?.addEventListener('click', () => showSlide(currentIndex + 1));
+        prevBtn?.addEventListener('click', () => showSlide(currentIndex - 1));
+
+        dots.forEach((dot, i) => {
+          dot.addEventListener('click', () => showSlide(i));
+        });
+
+        showSlide(0);
+        setInterval(() => showSlide(currentIndex + 1), 4000);
+      }
+
+      /* ================= IN-MEMORY STORAGE LOGIC ================= */
+      const CATEGORIES = [
+        { id: 'all', label: 'All Store' },
+        { id: 'fruits', label: 'Fruits' },
+        { id: 'veggies', label: 'Vegetables' },
+        { id: 'dairy', label: 'Dairy' },
+        { id: 'bakery', label: 'Bakery' },
+        { id: 'snacks', label: 'Snacks' },
+        { id: 'beverages', label: 'Beverages' },
+        { id: 'household', label: 'Household' }
+      ];
+
+      const PRODUCTS = [
+        { id: 'apple', title: 'Shimla Apples', price: 89, unit: '500 g', category: 'fruits', img: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?q=80&w=800&auto=format&fit=crop' },
+        { id: 'banana', title: 'Yelakki Bananas', price: 59, unit: '6 pcs', category: 'fruits', img: 'https://m.media-amazon.com/images/I/81MX4Y9V3CL._UF1000,1000_QL80_.jpg' },
+        { id: 'palak', title: 'Fresh Spinach', price: 35, unit: '250 g', category: 'veggies', img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=800&auto=format&fit=crop' },
+        { id: 'milk', title: 'Full Cream Milk', price: 68, unit: '1 L', category: 'dairy', img: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=800&auto=format&fit=crop' },
+        { id: 'bread', title: 'Whole Wheat Bread', price: 48, unit: '400 g', category: 'bakery', img: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?q=80&w=800&auto=format&fit=crop' },
+        { id: 'chips', title: 'Classic Chips', price: 30, unit: '80 g', category: 'snacks', img: 'https://m.media-amazon.com/images/I/71pvIFxKYaL._UF350,350_QL80_.jpg' },
+        { id: 'cola', title: 'Cola Beverage', price: 40, unit: '500 ml', category: 'beverages', img: 'https://images.unsplash.com/photo-1600267175168-c7133d1fd3c2?q=80&w=800&auto=format&fit=crop' },
+        { id: 'cleaner', title: 'Floor Cleaner', price: 199, unit: '1 L', category: 'household', img: 'https://images.unsplash.com/photo-1621974265876-9d5e3077a651?q=80&w=800&auto=format&fit=crop' },
+        { id: 'butter', title: 'Amul Butter', price: 199, unit: '200 ml', category: 'dairy', img: 'https://m.media-amazon.com/images/I/51KrxEKN58L._AC_SY350_QL15_.jpg' }
+      ];
+
+      /* ================= APP LOCAL STORAGE CONTEXT STATE ================= */
+      let state = {
+        q: '',
+        activeCat: 'all',
+        cart: JSON.parse(localStorage.getItem('qc_cart') || '{}')
+      };
+
+      function saveCart() { 
+        localStorage.setItem('qc_cart', JSON.stringify(state.cart)); 
+      }
+      
+      function formatRupee(n) { 
+        return '₹' + n; 
+      }
+
+      /* ================= DYNAMIC ELEMENTS UI RENDERING ENGINE ================= */
+      const productGrid = document.getElementById('productGrid');
+      const categoryPills = document.getElementById('categoryPills');
+      const searchInput = document.getElementById('search');
+      const fabCart = document.getElementById('fabCart');
+      const fabCount = document.getElementById('fabCount');
+      const subtotalEl = document.getElementById('subtotal');
+      const cartOverlay = document.getElementById('cartOverlay');
+      const cartSheet = document.getElementById('cartSheet');
+      const cartItemsWrap = document.getElementById('cartItems');
+
+      function renderCategories() {
+        if (!categoryPills) return;
+        categoryPills.innerHTML = '';
+        
+        CATEGORIES.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = `shrink-0 rounded-2xl border px-4 py-2 text-sm font-medium transition-all ${
+            state.activeCat === cat.id ? 'bg-green-600 text-white border-green-600 shadow-sm' : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`;
+          btn.textContent = cat.label;
+          btn.onclick = () => { 
+            state.activeCat = cat.id; 
+            renderAll(); 
+          };
+          categoryPills.appendChild(btn);
+        });
+      }
+
+      function renderProducts() {
+        if (!productGrid) return;
+        productGrid.innerHTML = '';
+
+        const query = state.q.toLowerCase();
+        const filtered = PRODUCTS.filter(p => {
+          const matchCat = (state.activeCat === 'all' || p.category === state.activeCat);
+          const matchQuery = p.title.toLowerCase().includes(query);
+          return matchCat && matchQuery;
+        });
+
+        if (filtered.length === 0) {
+          productGrid.innerHTML = `<div class="col-span-full py-8 text-center text-gray-400 text-sm">No matched product listings available.</div>`;
+          return;
+        }
+
+        filtered.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'rounded-3xl border bg-white p-3 shadow-sm flex flex-col justify-between';
+
+          card.innerHTML = `
+            <div>
+              <img src="${p.img}" class="h-32 sm:h-36 w-full rounded-2xl object-cover" alt="${p.title}">
+              <h3 class="mt-2 text-sm font-semibold text-gray-800">${p.title}</h3>
+              <p class="text-xs text-gray-400">${p.unit}</p>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <span class="font-bold text-gray-900">${formatRupee(p.price)}</span>
+              <button class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 font-semibold rounded-xl transition">
+                Add
+              </button>
+            </div>
+          `;
+
+          card.querySelector('button').onclick = () => {
+            state.cart[p.id] = (state.cart[p.id] || 0) + 1;
+            saveCart();
+            renderAll();
+          };
+
+          productGrid.appendChild(card);
+        });
+      }
+
+      function cartCount() {
+        return Object.values(state.cart).reduce((a, b) => a + b, 0);
+      }
+
+      function updateFab() {
+        const c = cartCount();
+        if (!fabCart) return;
+        if (c > 0) {
+          fabCart.style.display = 'inline-flex';
+          fabCount.textContent = c;
+        } else {
+          fabCart.style.display = 'none';
+        }
+      }
+
+      function renderCart() {
+        if (!cartItemsWrap) return;
+        cartItemsWrap.innerHTML = '';
+        let total = 0;
+
+        const cartEntries = Object.entries(state.cart).filter(([_, qty]) => qty > 0);
+
+        if (cartEntries.length === 0) {
+          cartItemsWrap.innerHTML = `<div class="text-center py-12 text-gray-400 text-sm">Your item basket is completely empty.</div>`;
+          if (subtotalEl) subtotalEl.textContent = formatRupee(0);
+          return;
+        }
+
+        cartEntries.forEach(([id, qty]) => {
+          const p = PRODUCTS.find(x => x.id === id);
+          if (!p) return;
+          total += p.price * qty;
+
+          const row = document.createElement('div');
+          row.className = 'flex items-center justify-between border border-gray-100 p-3 rounded-xl bg-gray-50';
+          
+          row.innerHTML = `
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold">${p.title}</span>
+              <span class="text-xs text-gray-400">${formatRupee(p.price)} &times; ${qty}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="bg-gray-200 text-gray-800 text-xs w-6 h-6 flex items-center justify-center rounded-lg font-bold" data-action="dec">-</button>
+              <span class="text-sm font-bold w-4 text-center">${qty}</span>
+              <button class="bg-gray-200 text-gray-800 text-xs w-6 h-6 flex items-center justify-center rounded-lg font-bold" data-action="inc">+</button>
+            </div>
+          `;
+
+          row.querySelector('[data-action="dec"]').onclick = () => {
+            if (state.cart[id] > 1) state.cart[id]--;
+            else delete state.cart[id];
+            saveCart();
+            renderAll();
+          };
+
+          row.querySelector('[data-action="inc"]').onclick = () => {
+            state.cart[id]++;
+            saveCart();
+            renderAll();
+          };
+
+          cartItemsWrap.appendChild(row);
+        });
+
+        if (subtotalEl) subtotalEl.textContent = formatRupee(total);
+      }
+
+      /* ================= EVENT EMISSION DRIVERS ================= */
+      fabCart?.addEventListener('click', () => {
+        cartOverlay.classList.remove('hidden');
+        cartSheet.classList.remove('translate-x-full');
+        renderCart();
+      });
+
+      document.getElementById('closeCart')?.addEventListener('click', () => {
+        cartOverlay.classList.add('hidden');
+        cartSheet.classList.add('translate-x-full');
+      });
+
+      cartOverlay?.addEventListener('click', () => {
+        cartOverlay.classList.add('hidden');
+        cartSheet.classList.add('translate-x-full');
+      });
+
+      searchInput?.addEventListener('input', e => {
+        state.q = e.target.value;
+        renderAll();
+      });
+
+      function renderAll() {
+        renderCategories();
+        renderProducts();
+        updateFab();
+        renderCart();
+      }
+
+      renderAll();
+    });
+
+    /* ================= MODAL OVERLAY ROUTINES ================= */
+    function showPopup() {
+      document.getElementById("popup").style.display = "flex";
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    function openGmail() {
+      window.location.href = "mailto:chirayuvaidya955@gmail.com";
+      closePopup();
+    }
+
+    function openInstagram() {
+      window.open("https://instagram.com/vaidya__chirayu", "_blank");
+      closePopup();
+    }
+  </script>
+</body>
+</html>
